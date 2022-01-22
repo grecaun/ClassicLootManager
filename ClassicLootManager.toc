@@ -98,6 +98,7 @@ Modules\LootQueueManager\LootQueueManager.lua
 Modules\AutoAwardManager\EncounterIDs.lua
 
 # Addon Options and GUIs (View)
+Modules\XML\GUI.lua
 Modules\ProfileManager\GUI.lua
 Modules\RosterManager\Options.lua
 Modules\RosterManager\GUI.lua

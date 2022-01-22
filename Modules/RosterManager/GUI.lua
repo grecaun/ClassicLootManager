@@ -303,6 +303,28 @@ local function GenerateManagerOptions(self)
             end),
             confirm = true,
             order = 27
+        },
+        export_xml_button = {
+            name = CLM.L["Export to XML"],
+            desc = CLM.L["Exports standings in XML format."],
+            type = "execute",
+            width = "full",
+            func = (function()
+                ExportString = "<dkptable>\n";
+                -- Get all on the roster
+                local roster = self:GetCurrentRoster()
+                if not roster then return end
+                for GUID,value in pairs(roster:Standings()) do
+                    local profile = ProfileManager:GetProfileByGUID(GUID)
+                    if profile and (not profile:Main() or profile:Main() == "") then
+                        ExportString = ExportString.."    <dkpentry>\n        <player>"..profile:Name().."</player>\n        <class>"..profile:Class().."</class>\n        <dkp>"..value.."</dkp>\n    </dkpentry>\n"
+                    end
+                end
+                ExportString = ExportString.."</dkptable>"
+                GUI.XMLExport:Show(ExportString)
+            end),
+            confirm = false,
+            order = 101
         }
     }
 end
@@ -534,7 +556,7 @@ function StandingsGUI:Create()
     f:SetUserData("table", { columns = {0, 0}, alignV =  "top" })
     f:EnableResize(false)
     f:SetWidth(800)
-    f:SetHeight(685)
+    f:SetHeight(725)
     self.top = f
     UTILS.MakeFrameCloseOnEsc(f.frame, "CLM_Rosters_GUI")
     f:AddChild(CreateStandingsDisplay(self))

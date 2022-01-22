@@ -136,7 +136,7 @@ local function CreateLootDisplay(self)
     -- Standings
     self.st = ScrollingTable:CreateST(columns.playerLoot, 25, 18, nil, StandingsGroup.frame)
     self.st:EnableSelection(true)
-    self.st.frame:SetPoint("TOPLEFT", RosterSelectorDropDown.frame, "TOPLEFT", 0, -60)
+    self.st.frame:SetPoint("TOPLEFT", RosterSelectorDropDown.frame, "TOPLEFT", 0, -120)
     self.st.frame:SetBackdropColor(0.1, 0.1, 0.1, 0.8)
     self.st:SetFilter((function(stobject, row)
         local item = strlower(ST_GetItemLink(row))
@@ -208,7 +208,34 @@ local function CreateLootDisplay(self)
         return status
     end
     -- end
-
+    local dateDropdown = AceGUI:Create("Dropdown")
+    dateDropdown:SetLabel(CLM.L["Date"])
+    self.DateDropdown = dateDropdown
+    StandingsGroup:AddChild(dateDropdown)
+    local export = AceGUI:Create("Button")
+    export:SetText(CLM.L["Export to XML"])
+    export:SetCallback("OnClick", function()
+        local roster = self:GetCurrentRoster()
+        if roster == nil then return end
+        lootList = roster:GetRaidLoot()
+        ExportString = "<loothistory>\n"
+        for _, loot in ipairs(lootList) do
+            if GetItemInfoInstant(loot:Id()) then
+                local itemName = GetItemInfo(loot:Id())
+                local name = loot:Owner():Name()
+                local profile = ProfileManager:GetProfileByGUID(loot:OwnerGUID())
+                if profile:Main() and profile:Main() ~= "" then
+                    name = ProfileManager:GetProfileByGUID(profile:Main()):Name()
+                end
+                if itemName and date("%Y/%m/%d", loot:Timestamp()) == self.DateDropdown:GetValue() then
+                    ExportString = ExportString.."    <lootentry>\n        <player>"..name.."</player>\n        <itemname>"..itemName.."</itemname>\n        <itemnumber>"..loot:Id().."</itemnumber>\n        <timestamp>"..loot:Timestamp().."</timestamp>\n        <cost>"..loot:Value().."</cost>\n    </lootentry>\n"
+                end
+            end
+        end
+        ExportString = ExportString.."</loothistory>"
+        CLM.GUI.XMLExport:Show(ExportString)
+    end)
+    StandingsGroup:AddChild(export)
     self.st:RegisterEvents({
         OnEnter = OnEnterHandler,
         OnLeave = OnLeaveHandler,
@@ -227,7 +254,7 @@ function LootGUI:Create()
     f:SetUserData("table", { columns = {0, 0}, alignV =  "top" })
     f:EnableResize(false)
     f:SetWidth(670)
-    f:SetHeight(600)
+    f:SetHeight(660)
     self.top = f
     UTILS.MakeFrameCloseOnEsc(f.frame, "CLM_Loot_GUI")
     self.requestRefreshProfiles = true
@@ -293,6 +320,8 @@ function LootGUI:Refresh(visible)
 
     local rowId = 1
     local data = {}
+    local dateMap = {}
+    local dateList = {}
     for _,lootData in ipairs(self.displayedLoot) do
         local loot = lootData[1]
         -- local link = lootData[2]
@@ -305,8 +334,22 @@ function LootGUI:Refresh(visible)
         row.cols[5] = {value = loot}
         data[rowId] =  row
         rowId = rowId + 1
+        if not dateMap[date("%Y/%m/%d", loot:Timestamp())] then
+            local d = date("%Y/%m/%d", loot:Timestamp())
+            dateMap[d] = d
+            table.insert(dateList, d)
+        end
     end
 
+    table.sort(dateList, function (a,b)
+        return (a > b)
+    end)
+    self.DateDropdown:SetList(dateMap, dateList)
+    if not self.DateDropdown:GetValue() then
+        if #dateList > 0 then
+            self.DateDropdown:SetValue(dateList[1])
+        end
+    end
     self.st:SetData(data)
 end
 
