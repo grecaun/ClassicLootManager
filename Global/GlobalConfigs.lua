@@ -17,6 +17,9 @@ function GlobalConfigs:Initialize()
         tracked_loot_level = 4,
         wowdkpbot_integration = false,
         chat_commands = false,
+        alerts = true,
+        suppress_incoming_chat_commands = false,
+        suppress_outgoing_chat_commands = false,
         raid_warnings = {
             raid = true,
             auction = true,
@@ -38,6 +41,15 @@ function GlobalConfigs:Initialize()
             type = "header",
             name = CLM.L["Global"],
             order = 1
+        },
+        global_alerts = {
+            name = CLM.L["DKP & Loot alerts"],
+            desc = CLM.L["Toggles alerts display when receiving DKP or loot."],
+            type = "toggle",
+            set = function(i, v) self:SetAlerts(v) end,
+            get = function(i) return self:GetAlerts() end,
+            width = "double",
+            order = 2
         },
         global_raid_loot_announcement = {
             name = CLM.L["Announce loot from corpse to Raid"],
@@ -167,6 +179,14 @@ function GlobalConfigs:Initialize()
     ConfigManager:Register(CLM.CONSTANTS.CONFIGS.GROUP.GLOBAL, options)
 end
 
+function GlobalConfigs:SetAlerts(value)
+    self.db.alerts = value and true or false
+end
+
+function GlobalConfigs:GetAlerts()
+    return self.db.alerts
+end
+
 function GlobalConfigs:SetAnnounceAwardToGuild(value)
     self.db.announce_award_to_guild = value and true or false
 end
@@ -213,6 +233,22 @@ end
 
 function GlobalConfigs:GetAllowChatCommands()
     return self.db.chat_commands
+end
+
+function GlobalConfigs:SetSuppressIncomingChatCommands(value)
+    self.db.suppress_incoming_chat_commands = value and true or false
+end
+
+function GlobalConfigs:GetSuppressIncomingChatCommands()
+    return self.db.suppress_incoming_chat_commands
+end
+
+function GlobalConfigs:SetSuppressOutgoingChatCommands(value)
+    self.db.suppress_outgoing_chat_commands = value and true or false
+end
+
+function GlobalConfigs:GetSuppressOutgoingChatCommands()
+    return self.db.suppress_outgoing_chat_commands
 end
 
 function GlobalConfigs:SetRaidWarning(value)
