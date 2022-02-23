@@ -297,47 +297,6 @@ local function GenerateManagerOptions(self)
             confirm = true,
             order = 14
         },
-        roster_players_header = {
-            type = "header",
-            name = CLM.L["Players"],
-            order = 25
-        },
-        add_from_raid = {
-            name = CLM.L["Add from raid"],
-            desc = CLM.L["Adds players from current raid to the roster. Creates profiles if not exists."],
-            type = "execute",
-            width = "full",
-            func = (function()
-                local roster, _ = self:GetSelected()
-                if roster == nil then
-                    LOG:Debug("StandingsGUI(Remove): roster == nil")
-                    return
-                end
-                RosterManager:AddFromRaidToRoster(roster)
-            end),
-            confirm = true,
-            order = 26
-        },
-        remove_from_roster = {
-            name = CLM.L["Remove from roster"],
-            desc = CLM.L["Removes selected players from roster or everyone if none selected."],
-            type = "execute",
-            width = "full",
-            func = (function(i)
-                local roster, profiles = self:GetSelected()
-                if roster == nil then
-                    LOG:Debug("StandingsGUI(Remove): roster == nil")
-                    return
-                end
-                if not profiles or #profiles == 0 then
-                    LOG:Debug("StandingsGUI(Remove): profiles == 0")
-                    return
-                end
-                RosterManager:RemoveProfilesFromRoster(roster, profiles)
-            end),
-            confirm = true,
-            order = 27
-        },
         export_xml_button = {
             name = CLM.L["Export to XML"],
             desc = CLM.L["Exports standings in XML format."],
@@ -745,8 +704,8 @@ function StandingsGUI:Create()
     f:SetLayout("Table")
     f:SetUserData("table", { columns = {0, 0}, alignV =  "top" })
     f:EnableResize(false)
-    f:SetWidth(800)
-    f:SetHeight(725)
+    f:SetWidth(675)
+    f:SetHeight(655)
     self.top = f
     UTILS.MakeFrameCloseOnEsc(f.frame, "CLM_Rosters_GUI")
     f:AddChild(CreateStandingsDisplay(self))
