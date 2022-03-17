@@ -40,6 +40,8 @@ local FILTER_IN_GUILD = 103
 local FILTER_NOT_IN_GUILD = 104
 local FILTER_MAINS_ONLY = 105
 
+local POINT_CHANGE_REASON_DECAY = CONSTANTS.POINT_CHANGE_REASON.DECAY
+local POINT_CHANGE_REASONS_ALL = CONSTANTS.POINT_CHANGE_REASONS.ALL
 
 local StandingsGUI = {}
 
@@ -95,6 +97,18 @@ end
 
 local function ST_GetWeeklyCap(row)
     return row.cols[7].value
+end
+
+local function ST_GetPointInfo(row)
+    return row.cols[8].value
+end
+
+local function ST_GetProfileLoot(row)
+    return row.cols[9].value
+end
+
+local function ST_GetProfilePoints(row)
+    return row.cols[10].value
 end
 
 local function UpdateStatusText(self)
@@ -644,12 +658,57 @@ local function CreateStandingsDisplay(self)
         tooltip:SetOwner(rowFrame, "ANCHOR_TOPRIGHT")
         local weeklyGain = ST_GetWeeklyGains(rowData)
         local weeklyCap = ST_GetWeeklyCap(rowData)
-        tooltip:AddLine(CLM.L["Weekly gains:"])
         local gains = weeklyGain
         if weeklyCap > 0 then
             gains = gains .. " / " .. weeklyCap
         end
-        tooltip:AddLine(gains)
+        local pointInfo = ST_GetPointInfo(rowData)
+        tooltip:AddDoubleLine(CLM.L["Information"], CLM.L["DKP"])
+        tooltip:AddDoubleLine(CLM.L["Weekly gains"], gains)
+        tooltip:AddLine("\n")
+        -- Statistics
+        tooltip:AddLine(UTILS.ColorCodeText(CLM.L["Statistics:"], "44ee44"))
+        tooltip:AddDoubleLine(CLM.L["Total spent"], pointInfo.spent)
+        tooltip:AddDoubleLine(CLM.L["Total received"], pointInfo.received)
+        tooltip:AddDoubleLine(CLM.L["Total blocked"], pointInfo.blocked)
+        tooltip:AddDoubleLine(CLM.L["Total decayed"], pointInfo.decayed)
+        -- Loot History
+        local lootList = ST_GetProfileLoot(rowData)
+        tooltip:AddLine("\n")
+        if #lootList > 0 then
+            tooltip:AddLine(UTILS.ColorCodeText(CLM.L["Latest loot:"], "44ee44"))
+            local limit = #lootList - 4 -- inclusive (- 5 + 1)
+            if limit < 1 then
+                limit = 1
+            end
+            for i=#lootList, limit, -1 do
+                local loot = lootList[i]
+                local _, itemLink = GetItemInfo(loot:Id())
+                if itemLink then
+                    tooltip:AddDoubleLine(itemLink, loot:Value())
+                end
+            end
+        else
+            tooltip:AddLine(CLM.L["No loot received"])
+        end
+        -- Point History
+        local pointList = ST_GetProfilePoints(rowData)
+        tooltip:AddLine("\n")
+        if #pointList > 0 then
+            tooltip:AddLine(UTILS.ColorCodeText(CLM.L["Latest DKP changes:"], "44ee44"))
+            for i, point in ipairs(pointList) do -- so I do have 2 different orders. Why tho
+                if i > 5 then break end
+                local reason = point:Reason() or 0
+                local value = tostring(point:Value())
+                if reason == POINT_CHANGE_REASON_DECAY then
+                    value = value .. "%"
+                end
+                tooltip:AddDoubleLine(POINT_CHANGE_REASONS_ALL[reason] or "", value)
+            end
+        else
+            tooltip:AddLine(CLM.L["No points received"])
+        end
+        -- Display
         tooltip:Show()
         return status
     end)
@@ -732,14 +791,17 @@ function StandingsGUI:Refresh(visible)
         local attendance = round(roster:GetAttendance(GUID) or 0, 0)
         if profile then
             local row = {cols = {}}
-            row.cols[1] = {value = profile:Name()}
-            row.cols[2] = {value = value}
-            row.cols[3] = {value = UTILS.ColorCodeClass(profile:Class())}
-            row.cols[4] = {value = profile:SpecString()}
-            row.cols[5] = {value = ColorCodeByPercentage(attendance)}
+            row.cols[1]  = {value = profile:Name()}
+            row.cols[2]  = {value = value}
+            row.cols[3]  = {value = UTILS.ColorCodeClass(profile:Class())}
+            row.cols[4]  = {value = profile:SpecString()}
+            row.cols[5]  = {value = ColorCodeByPercentage(attendance)}
             -- not displayed
-            row.cols[6] = {value = roster:GetCurrentGainsForPlayer(GUID)}
-            row.cols[7] = {value = weeklyCap}
+            row.cols[6]  = {value = roster:GetCurrentGainsForPlayer(GUID)}
+            row.cols[7]  = {value = weeklyCap}
+            row.cols[8]  = {value = roster:GetPointInfoForPlayer(GUID)}
+            row.cols[9]  = {value = roster:GetProfileLootByGUID(GUID)}
+            row.cols[10] = {value = roster:GetProfilePointHistoryByGUID(GUID)}
             data[rowId] = row
             rowId = rowId + 1
         end
