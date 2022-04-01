@@ -37,7 +37,6 @@ jobs:
         run: mkdir -p .release/ClassicLootManager && mv ExternalLibs .release/ClassicLootManager/
       - name: Bigwigs packager
         uses: BigWigsMods/packager@671e9a055942010dda29a24334510ac1aee0d911
-        env:
         with:
           args: "-o -e -u -m .pkgmeta -g classic"
       - name: Get name of zip file
@@ -69,7 +68,6 @@ jobs:
         run: mkdir -p .release/ClassicLootManager && mv ExternalLibs .release/ClassicLootManager/
       - name: Bigwigs packager
         uses: BigWigsMods/packager@671e9a055942010dda29a24334510ac1aee0d911
-        env:
         with:
           args: "-o -e -u -m .pkgmeta -g bcc"
       - name: Get name of zip file
