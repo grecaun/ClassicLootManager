@@ -183,7 +183,6 @@ function BiddingManager:HandleStartAuction(data, sender)
     self.auctionInfo = data
     self.auctioneer = sender
     self.auctionInProgress = true
-    PlayStartSound()
     GUI.BiddingManager:StartAuction(self:GetAutoOpen(), self.auctionInfo)
     LOG:Message(CLM.L["Auction of "] .. self.auctionInfo:ItemLink())
 end
