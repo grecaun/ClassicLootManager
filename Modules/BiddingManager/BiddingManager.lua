@@ -195,7 +195,6 @@ function BiddingManager:HandleStopAuction(data, sender)
     end
     self.auctionInProgress = false
     self:ClearAuctionInfo()
-    PlayEndSound()
     GUI.BiddingManager:EndAuction()
     LOG:Message(CLM.L["Auction finished"])
 end
