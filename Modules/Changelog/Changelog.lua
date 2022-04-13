@@ -1,6 +1,36 @@
 local  _, CLM = ...
 CLM.ChangelogData = {
     {
+        version = "v1.8.0",
+        data = {
+            {
+                name = "Features",
+                data = {
+                    {header = "Spanish Locale", body = "Spanish locale is now available to use. Big thank you to |cffAA151BSto|r|cffF1BF00ytovis|r|cffAA151Biao|r for the contribution."},
+                },
+            },
+            {
+                name = "Fixes",
+                data = {
+                    {header = "CommunityDKP Migration", body = "CommunityDKP migration for multiple teams in TBC should now properly set the DKP values."},
+                    {header = "Weekly gains", body = "Weekly gains should now be properly calculated if there is now weekly cap."},
+                    {header = "Alerts", body = "Alerts should now better display small, fractional values."},
+                },
+            },
+        }
+    },
+    {
+        version = "v1.7.1",
+        data = {
+            {
+                name = "Hotfix",
+                data = {
+                    {header = "Weekly cap", body = "Hotfix script errors for weekly cap."},
+                },
+            },
+        }
+    },
+    {
         version = "v1.7.0",
         data = {
             {
